@@ -1,0 +1,136 @@
+﻿@model System.Data.DataTable
+<section class="content">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-6" style="float: none; margin: 0 auto 20px auto; ">
+				<div class="card card-primary">
+					<div class="card-body">
+						<div class="form-group">
+							<label for="name">İsim</label>
+							<input type="text" class="form-control" id="name" placeholder="İsminizi Giriniz...">
+						</div>
+						<div class="form-group">
+							<label for="lastName">Soy isim</label>
+							<input type="text" class="form-control" id="lastName" placeholder="Soy İsminizi Giriniz...">
+						</div>
+						<div class="form-group">
+							<label for="address">Adres</label>
+							<textarea class="form-control" id="address" placeholder="Adresinizi Giriniz...">  </textarea>
+						</div>
+						<div class="form-group">
+							<label for="email">Email</label>
+							<input type="email" class="form-control" id="email" placeholder="Email'inizi Giriniz...">
+						</div>
+					</div>
+					<div class="card-footer" style="text-align: center;">
+						<input type="submit" id="submit" class="btn btn-primary" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+
+<section class="content">
+	<div class="container-fluid">
+		<div class="card">
+			<div class="card-body">
+				<table id="datas" class="table table-hover">
+					<thead>
+						<tr>
+							<th>İsim</th>
+							<th>Soy isim</th>
+							<th>Email</th>
+							<th>Adres</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</section>
+
+
+<script>
+	var datas = []
+
+	@*@for (int i = 0; i < Model.Rows.Count; i++)
+	{
+		<text>
+			datas.push({ name: '@Model.Rows[i][3]', lastName: '@Model.Rows[i][2]', address: '@Model.Rows[i][0]', email: '@Model.Rows[i][1]' });
+		</text>
+	}*@
+
+
+		var table = $('#datas').DataTable({
+		"paging": false,
+		"lengthChange": false,
+		"searching": false,
+		"ordering": false,
+		"info": true,
+		"autoWidth": false,
+		"responsive": true,
+		dom: "Bfrtip",
+		buttons: [
+			{
+				text: 'Export Excel',
+				className: 'btn btn-primary',
+				attr: {
+					id: 'exportExcel',
+					style: "float: left;"
+				}
+
+			}
+		]
+	});
+
+
+	$("#submit").on("click", function() {
+		datas.push({ name: $("#name").val(), lastName: $("#lastName").val(), address: $("#address").val(), email: $("#email").val() });
+		table.row.add([$("#name").val(), $("#lastName").val(), $("#email").val(), $("#address").val()]).draw(false);
+		exportExcel();
+		clear();
+	});
+
+	$("#exportExcel").on("click", function() {
+		exportExcelTable();
+	});
+
+	function clear() {
+		$("#name").val("")
+		$("#lastName").val("")
+		$("#address").val("")
+		$("#email").val("")
+	}
+
+	function exportExcel() {
+		person = {
+			name: $("#name").val(),
+			lastName: $("#lastName").val(),
+			address: $("#address").val(),
+			email: $("#email").val()
+		};
+		$.ajax({
+			data: { data: JSON.stringify([person]) },
+			url: "/Home/CreateExcel",
+			success: function(result) {
+				console.log(result)
+				window.location = result;
+			}
+		});
+	}
+
+	function exportExcelTable() {
+		$.ajax({
+			url: "/Home/CreateExcelForTable",
+			success: function(result) {
+				console.log(result)
+				window.location = result;
+			}
+		});
+	}
+
+</script>
